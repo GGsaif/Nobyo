@@ -1,0 +1,475 @@
+{% extends 'store/base.html' %}
+{% load static %}
+
+{% block title %}Checkout - Nobyo-নব্য{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background-color: #f8f9fa;
+    }
+
+    .checkout-card {
+        background: white;
+        border-radius: 12px;
+        border: none;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .form-label-bangla {
+        font-weight: 600;
+        font-size: 0.95rem;
+        color: #333;
+        margin-bottom: 8px;
+        display: block;
+    }
+
+    .input-group-custom {
+        position: relative;
+    }
+
+    .input-group-custom i {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #999;
+    }
+
+    .input-group-custom input,
+    .input-group-custom textarea {
+        padding-left: 45px !important;
+        border-radius: 10px !important;
+        border: 1px solid #e0e0e0;
+        background: #fdfdfd;
+    }
+
+    .input-group-custom input:focus {
+        border-color: #00b894;
+        box-shadow: 0 0 0 3px rgba(0, 184, 148, 0.1);
+    }
+
+    .char-count {
+        font-size: 0.75rem;
+        color: #999;
+        float: right;
+        margin-top: -25px;
+        margin-right: 10px;
+        position: relative;
+        z-index: 5;
+    }
+
+    .delivery-option {
+        cursor: pointer;
+        border: 1px solid #e0e0e0;
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 10px;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .delivery-option:hover {
+        border-color: #00b894;
+        background: #f0fff9;
+    }
+
+    .delivery-option.active {
+        border-color: #00b894;
+        background: #f0fff9;
+        box-shadow: 0 0 0 2px rgba(0, 184, 148, 0.1);
+    }
+
+    .delivery-option input {
+        display: none;
+    }
+
+    .qty-btn {
+        border: 1px solid #eee;
+        background: white;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .qty-btn:hover {
+        background: #eee;
+    }
+
+    .place-order-btn {
+        background: #1a1b1e;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        padding: 16px;
+        font-weight: 700;
+        width: 100%;
+        transition: all 0.2s;
+    }
+
+    .place-order-btn:hover {
+        background: #000;
+        transform: translateY(-2px);
+    }
+
+    .cart-item-img {
+        width: 64px;
+        height: 64px;
+        object-fit: cover;
+        border-radius: 8px;
+    }
+
+    /* Radio Dot Styles */
+    .radio-dot-container {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        border: 1px solid #e0e0e0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+        flex-shrink: 0;
+    }
+
+    .radio-dot {
+        width: 10px;
+        height: 10px;
+        background: #00b894;
+        border-radius: 50%;
+        opacity: 0;
+        transform: scale(0.5);
+        transition: all 0.2s;
+    }
+
+    .delivery-option.active .radio-dot-container {
+        border-color: #00b894;
+    }
+
+    .delivery-option.active .radio-dot {
+        opacity: 1;
+        transform: scale(1);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Back arrow and Brand -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <a href="{% url 'store:product_list' %}" class="text-dark"><i class="fas fa-arrow-left fa-lg"></i></a>
+        <h5 class="fw-bold mb-0">Nobyo-নব্য</h5>
+    </div>
+
+    <form method="post" id="checkout-form">
+        {% csrf_token %}
+        <div class="row g-4">
+            <!-- Left: Shipping Information -->
+            <div class="col-lg-7">
+                <div class="checkout-card p-4 mb-4">
+                    <div class="mb-4">
+                        <label class="form-label-bangla">আপনার নাম *</label>
+                        <div class="input-group-custom">
+                            <i class="far fa-user"></i>
+                            <input type="text" name="full_name" class="form-control py-3" placeholder="Enter your name"
+                                required value="{{ user.username }}">
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label-bangla">মোবাইল নাম্বার *</label>
+                        <div class="input-group-custom">
+                            <i class="fas fa-phone-alt"></i>
+                            <input type="text" name="phone_number" class="form-control py-3" placeholder="01XXXXXXXXX"
+                                required maxlength="11">
+                        </div>
+                        <span class="char-count">0 / 11</span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label-bangla">আপনার ঠিকানা *</label>
+                        <div class="input-group-custom">
+                            <i class="fas fa-map-marker-alt" style="top: 25px;"></i>
+                            <textarea name="address" class="form-control pt-3" placeholder="Enter full address" rows="4"
+                                required maxlength="255"></textarea>
+                        </div>
+                        <span class="char-count" style="margin-top: -30px;">0 / 255</span>
+                    </div>
+                </div>
+
+                <div class="checkout-card p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-primary bg-opacity-10 text-primary rounded-circle p-2 me-2">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <h6 class="fw-bold mb-0">Delivery Charge</h6>
+                    </div>
+
+                    <label class="delivery-option active w-100" onclick="selectZone('inside_dhaka', 80)">
+                        <div class="d-flex align-items-center">
+                            <input type="radio" name="delivery_zone" value="inside_dhaka" checked>
+                            <div class="radio-dot-container me-3">
+                                <div class="radio-dot"></div>
+                            </div>
+                            <div>
+                                <div class="fw-bold small">Inside Dhaka</div>
+                                <div class="text-muted" style="font-size: 0.7rem;">(2/3 days)</div>
+                            </div>
+                        </div>
+                        <div class="fw-bold">৳80.00</div>
+                    </label>
+
+                    <label class="delivery-option w-100" onclick="selectZone('dhaka_subcity', 120)">
+                        <div class="d-flex align-items-center">
+                            <input type="radio" name="delivery_zone" value="dhaka_subcity">
+                            <div class="radio-dot-container me-3">
+                                <div class="radio-dot"></div>
+                            </div>
+                            <div>
+                                <div class="fw-bold small">Dhaka Subcity</div>
+                                <div class="text-muted" style="font-size: 0.7rem;">(2/3 days)</div>
+                            </div>
+                        </div>
+                        <div class="fw-bold">৳120.00</div>
+                    </label>
+
+                    <label class="delivery-option w-100" onclick="selectZone('outside_dhaka', 140)">
+                        <div class="d-flex align-items-center">
+                            <input type="radio" name="delivery_zone" value="outside_dhaka">
+                            <div class="radio-dot-container me-3">
+                                <div class="radio-dot"></div>
+                            </div>
+                            <div>
+                                <div class="fw-bold small">Outside Dhaka</div>
+                                <div class="text-muted" style="font-size: 0.7rem;">(3/4 days)</div>
+                            </div>
+                        </div>
+                        <div class="fw-bold">৳140.00</div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Right: Order Summary -->
+            <div class="col-lg-5">
+                <div class="checkout-card p-4 sticky-top" style="top: 100px;">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h5 class="fw-bold mb-0">Your order</h5>
+                        <span class="text-muted small">Items: {{ cart|length }}</span>
+                    </div>
+
+                    <div class="order-items-scroll mb-4" style="max-height: 400px; overflow-y: auto;">
+                        {% for item in cart %}
+                        <div class="d-flex mb-4">
+                            <div class="position-relative">
+                                {% if item.product.image %}
+                                <img src="{{ item.product.image.url }}" class="cart-item-img">
+                                {% else %}
+                                <div class="cart-item-img bg-light"></div>
+                                {% endif %}
+                            </div>
+                            <div class="ms-3 flex-grow-1">
+                                <div class="d-flex justify-content-between">
+                                    <h6 class="fw-bold small mb-1" style="max-width: 180px;">{{ item.product.name }}
+                                    </h6>
+                                    <button type="button" class="btn btn-link text-muted p-0"
+                                        onclick="removeFromCart({{ item.product.id }})">
+                                        <i class="far fa-trash-alt"></i>
+                                    </button>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-end mt-2">
+                                    <div class="d-flex align-items-center border rounded-pill px-2 py-1">
+                                        <button type="button" class="qty-btn"
+                                            onclick="updateQty({{ item.product.id }}, {{ item.quantity|add:'-1' }})">-</button>
+                                        <span class="mx-3 fw-bold small">{{ item.quantity }}</span>
+                                        <button type="button" class="qty-btn"
+                                            onclick="updateQty({{ item.product.id }}, {{ item.quantity|add:'1' }})">+</button>
+                                    </div>
+                                    <div class="text-end">
+                                        <div class="fw-bold" style="font-size: 1.1rem;">৳{{ item.total_price }}</div>
+                                        <div class="text-muted" style="font-size: 0.75rem;">৳{{ item.price }} / unit
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="border-top pt-3">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted small">Product Total</span>
+                            <span class="fw-bold">৳<span id="subtotal">{{ cart.get_total_price }}</span></span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted small">Delivery Charge</span>
+                            <span class="fw-bold">৳<span id="delivery-charge-display">80</span></span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-3 text-success">
+                            <span class="small">Discount</span>
+                            <span class="fw-bold">-৳0</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-4 pt-3 border-top">
+                            <h5 class="fw-bold">Final Total</h5>
+                            <h5 class="fw-bold">৳<span id="grand-total">0</span></h5>
+                        </div>
+
+                        <button type="submit" class="place-order-btn">
+                            Place order <i class="fas fa-arrow-right ms-2"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Hidden forms for JS updates -->
+<form id="qty-update-form" method="post" style="display:none;">
+    {% csrf_token %}
+    <input type="hidden" name="quantity" id="qty-input">
+</form>
+<form id="remove-form" method="post" style="display:none;">
+    {% csrf_token %}
+</form>
+
+<script>
+    function selectZone(zone, charge) {
+        // Update UI
+        document.querySelectorAll('.delivery-option').forEach(el => el.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+        event.currentTarget.querySelector('input').checked = true;
+
+        // Update display
+        document.getElementById('delivery-charge-display').innerText = charge;
+        calculateTotal();
+    }
+
+    function calculateTotal() {
+        try {
+            const subtotalEl = document.getElementById('subtotal');
+            const deliveryEl = document.getElementById('delivery-charge-display');
+            const grandTotalEl = document.getElementById('grand-total');
+
+            if (!subtotalEl || !deliveryEl || !grandTotalEl) return;
+
+            // Remove everything except numbers and dots
+            const subtotal = parseFloat(subtotalEl.innerText.replace(/[^\d.-]/g, '')) || 0;
+            const deliveryCharge = parseFloat(deliveryEl.innerText.replace(/[^\d.-]/g, '')) || 0;
+
+            const grandTotal = subtotal + deliveryCharge;
+
+            // Format to 2 decimal places
+            grandTotalEl.innerText = grandTotal.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        } catch (e) {
+            console.error('Error calculating total:', e);
+        }
+    }
+    async function updateQty(id, qty) {
+        if (qty < 1) return;
+        saveFormData(); // Save current inputs before reload
+        try {
+            const response = await fetch(`/cart/update/${id}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: `quantity=${qty}`
+            });
+            if (response.ok) {
+                location.reload();
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+
+    async function removeFromCart(id) {
+        saveFormData();
+        try {
+            const response = await fetch(`/cart/remove/${id}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+            if (response.ok) {
+                location.reload();
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+
+    // Form Persistence using sessionStorage
+    function saveFormData() {
+        const formData = {
+            full_name: document.querySelector('input[name="full_name"]').value,
+            phone_number: document.querySelector('input[name="phone_number"]').value,
+            address: document.querySelector('textarea[name="address"]').value,
+            delivery_zone: document.querySelector('input[name="delivery_zone"]:checked')?.value
+        };
+        sessionStorage.setItem('checkoutFormData', JSON.stringify(formData));
+    }
+
+    function loadFormData() {
+        const savedData = sessionStorage.getItem('checkoutFormData');
+        if (savedData) {
+            const data = JSON.parse(savedData);
+            if (data.full_name) document.querySelector('input[name="full_name"]').value = data.full_name;
+            if (data.phone_number) document.querySelector('input[name="phone_number"]').value = data.phone_number;
+            if (data.address) document.querySelector('textarea[name="address"]').value = data.address;
+            if (data.delivery_zone) {
+                const radio = document.querySelector(`input[name="delivery_zone"][value="${data.delivery_zone}"]`);
+                if (radio) {
+                    radio.checked = true;
+                    // Trigger the UI selectZone logic (slightly hacky but works)
+                    const label = radio.closest('.delivery-option');
+                    if (label) {
+                        // We need to simulate the click or just call selectZone
+                        const charge = data.delivery_zone === 'inside_dhaka' ? 80 : (data.delivery_zone === 'dhaka_subcity' ? 120 : 140);
+                        // Manual UI update to avoid infinite loops or missing event refs
+                        document.querySelectorAll('.delivery-option').forEach(el => el.classList.remove('active'));
+                        label.classList.add('active');
+                        document.getElementById('delivery-charge-display').innerText = charge;
+                        calculateTotal();
+                    }
+                }
+            }
+            // Clear once loaded so it doesn't linger forever
+            sessionStorage.removeItem('checkoutFormData');
+        }
+    }
+
+    // Initial load
+    window.addEventListener('DOMContentLoaded', () => {
+        loadFormData();
+        calculateTotal();
+
+        // Character counters
+        document.querySelectorAll('input[name="phone_number"], textarea[name="address"]').forEach(el => {
+            const updateCount = () => {
+                const countEl = el.parentElement.nextElementSibling;
+                if (countEl && countEl.classList.contains('char-count')) {
+                    countEl.innerText = `${el.value.length} / ${el.maxLength}`;
+                }
+            };
+            el.addEventListener('input', updateCount);
+            updateCount(); // Initial state
+        });
+    });
+</script>
+{% endblock %}

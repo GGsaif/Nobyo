@@ -1,0 +1,46 @@
+<div class="card-product h-100 position-relative shadow-sm hover-lift">
+    {% if product.stock > 0 %}
+    <div class="product-badges">
+        <span class="badge-stock"><i class="fas fa-check"></i> {{ product.stock }} In Stock</span>
+    </div>
+    {% elif product.is_preorder %}
+    <div class="product-badges">
+        <span class="badge-stock" style="background-color: #f39c12;"><i class="fas fa-clock"></i> Pre-Order</span>
+    </div>
+    {% else %}
+    <div class="product-badges">
+        <span class="badge-stock" style="background-color: #dc3545;"><i class="fas fa-times"></i> Out of Stock</span>
+    </div>
+    {% endif %}
+
+    <a href="{{ product.get_absolute_url }}" class="card-img-wrapper d-block">
+        {% if product.image %}
+        <img src="{{ product.image.url }}" alt="{{ product.name }}" loading="lazy">
+        {% else %}
+        <img src="https://via.placeholder.com/400x400?text={{ product.name }}" alt="{{ product.name }}" loading="lazy">
+        {% endif %}
+    </a>
+
+    <div class="card-body-product">
+        <h5 class="product-title">
+            <a href="{{ product.get_absolute_url }}" class="text-decoration-none text-dark">{{ product.name }}</a>
+        </h5>
+        <div class="product-price">
+            <span class="currency-symbol">৳</span> {{ product.price }}
+        </div>
+
+        {% if product.stock > 0 or product.is_preorder %}
+        <form action="{% url 'store:cart_add' product.id %}" method="post" class="add-to-cart-form"
+            data-product-id="{{ product.id }}">
+            {% csrf_token %}
+            <button type="submit" class="btn-add-cart">
+                Add to cart
+            </button>
+        </form>
+        {% else %}
+        <button type="button" class="btn-add-cart" disabled style="opacity: 0.5; cursor: not-allowed;">
+            Out of Stock
+        </button>
+        {% endif %}
+    </div>
+</div>

@@ -1,0 +1,111 @@
+{% if orders %}
+<div class="flex-grow-1 overflow-auto py-2 px-3 pb-5">
+    {% for order in orders %}
+    <div class="mb-3">
+        <!-- Order Card Header -->
+        <div class="drawer-order-card p-3 bg-white border rounded-3 shadow-sm" data-bs-toggle="collapse"
+            data-bs-target="#order-collapse-{{ order.id }}" aria-expanded="false">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="fw-bold small font-outfit text-dark">Order #{{ order.id }}</span>
+                <span
+                    class="badge rounded-pill {% if order.paid %}bg-success-soft text-success{% else %}bg-warning-soft text-warning{% endif %} smaller fw-bold">
+                    {% if order.paid %}Paid{% else %}Unpaid{% endif %}
+                </span>
+            </div>
+            <div class="smaller text-muted mb-2"><i class="far fa-calendar-alt me-1"></i>{{ order.created|date:"d M Y"
+                }}</div>
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center">
+                    <span class="smaller text-muted me-2">{{ order.items.count }} items</span>
+                    <i class="fas fa-chevron-down text-muted smaller transition-icon"></i>
+                </div>
+                <span class="fw-bold text-dark font-outfit">৳{{ order.get_total_cost }}</span>
+            </div>
+        </div>
+
+        <!-- Collapsible Details Section -->
+        <div class="collapse mt-2" id="order-collapse-{{ order.id }}">
+            <div class="bg-light rounded-3 p-3 border">
+                <h6 class="smaller fw-bold mb-3 border-bottom pb-2">Items Purchased</h6>
+                {% for item in order.items.all %}
+                <div class="d-flex align-items-center mb-2 last-child-mb-0">
+                    <div class="bg-white rounded p-1 me-2 border" style="width: 40px; height: 40px;">
+                        {% if item.product.image %}
+                        <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}"
+                            class="w-100 h-100 object-fit-cover rounded">
+                        {% endif %}
+                    </div>
+                    <div class="flex-grow-1 overflow-hidden">
+                        <div class="text-dark fw-medium text-truncate smaller">{{ item.product.name }}</div>
+                        <div class="text-muted" style="font-size: 0.65rem;">{{ item.quantity }} × ৳{{ item.price }}
+                        </div>
+                    </div>
+                    <div class="text-end ms-2">
+                        <span class="fw-bold text-dark" style="font-size: 0.75rem;">৳{{ item.get_cost }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+                <div class="mt-3 text-center">
+                    <a href="{% url 'store:order_detail' order.id %}"
+                        class="btn btn-outline-dark btn-xs rounded-pill px-3 py-1 font-outfit"
+                        style="font-size: 0.7rem;">
+                        View Full Receipt <i class="fas fa-external-link-alt ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="text-center py-5 mt-4">
+    <div class="mb-4 d-flex justify-content-center">
+        <div class="order-empty-icon bg-light rounded-circle d-flex align-items-center justify-content-center"
+            style="width: 100px; height: 100px;">
+            <i class="fas fa-box fa-3x text-muted opacity-50"></i>
+        </div>
+    </div>
+    <h5 class="fw-bold font-outfit mb-2">No order history</h5>
+    <p class="text-muted small px-5">Orders you place will appear here. Start shopping to fill your history!</p>
+    <button class="btn btn-dark btn-sm rounded-pill px-4 mt-3" data-bs-dismiss="offcanvas">Explore Products</button>
+</div>
+{% endif %}
+
+<style>
+    .bg-success-soft {
+        background-color: rgba(0, 184, 148, 0.1);
+    }
+
+    .bg-warning-soft {
+        background-color: rgba(253, 203, 110, 0.1);
+    }
+
+    .drawer-order-card {
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .drawer-order-card:hover {
+        border-color: var(--accent-color);
+        transform: translateY(-2px);
+    }
+
+    .transition-icon {
+        transition: transform 0.3s ease;
+    }
+
+    .drawer-order-card[aria-expanded="true"] .transition-icon {
+        transform: rotate(180deg);
+    }
+
+    .last-child-mb-0:last-child {
+        margin-bottom: 0 !important;
+    }
+
+    .btn-xs {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+        line-height: 1.5;
+        border-radius: 0.2rem;
+    }
+</style>

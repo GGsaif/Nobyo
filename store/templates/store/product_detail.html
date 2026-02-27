@@ -1,0 +1,238 @@
+{% extends 'store/base.html' %}
+{% load static %}
+
+{% block title %}{{ product.name }} | Nobyo-নব্য{% endblock %}
+
+{% block content %}
+<div class="container py-lg-5 py-4">
+    <!-- Breadcrumb Fix & Style -->
+    <nav aria-label="breadcrumb" class="mb-5 animate-slide-in">
+        <ol class="breadcrumb bg-transparent p-0 mb-0">
+            <li class="breadcrumb-item">
+                <a href="{% url 'store:product_list' %}"
+                    class="text-muted text-decoration-none hover-dark small fw-medium">Home</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{{ product.category.get_absolute_url }}"
+                    class="text-muted text-decoration-none hover-dark small fw-medium">
+                    {{ product.category.name }}
+                </a>
+            </li>
+            <li class="breadcrumb-item active small fw-bold font-outfit text-dark" aria-current="page">
+                {{ product.name }}
+            </li>
+        </ol>
+    </nav>
+
+    <div class="row g-5">
+        <!-- Product Image Section -->
+        <div class="col-lg-6 mb-4 mb-lg-0 animate-slide-in">
+            <div class="product-image-container position-sticky" style="top: 100px;">
+                <div
+                    class="bg-white rounded-5 shadow-lg border border-light overflow-hidden hover-lift-lg transition-base">
+                    {% if product.image %}
+                    <img src="{{ product.image.url }}" class="img-fluid w-100 h-100 object-fit-cover"
+                        alt="{{ product.name }}">
+                    {% else %}
+                    <div class="bg-light h-100 w-100 d-flex align-items-center justify-content-center"
+                        style="min-height: 500px;">
+                        <i class="fas fa-image text-muted opacity-25 fa-5x"></i>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Product Specs Section -->
+        <div class="col-lg-6 animate-slide-in" style="animation-delay: 0.1s;">
+            <div class="ps-lg-4">
+                <div class="mb-4">
+                    <span class="badge bg-light text-dark rounded-pill px-3 py-2 mb-3 border fw-medium small">
+                        Premium Selection
+                    </span>
+                    <h1 class="display-4 fw-bold font-outfit text-dark mb-2 mt-2" style="letter-spacing: -1px;">
+                        {{ product.name }}
+                    </h1>
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="text-warning me-2">
+                            <i class="fas fa-star smaller"></i>
+                            <i class="fas fa-star smaller"></i>
+                            <i class="fas fa-star smaller"></i>
+                            <i class="fas fa-star smaller"></i>
+                            <i class="fas fa-star-half-alt smaller"></i>
+                        </div>
+                        <span class="text-muted smaller fw-medium">(4.8/5 Reviews)</span>
+                    </div>
+                </div>
+
+                <div class="price-section mb-5">
+                    <h2 class="display-5 fw-bold text-dark font-outfit mb-0 d-flex align-items-center">
+                        <span class="fs-3 me-1 opacity-50 fw-normal">৳</span>{{ product.price }}
+                    </h2>
+                    <p class="text-success small fw-bold mt-2">
+                        <i class="fas fa-check-circle me-1"></i> Tax included & Free Shipping
+                    </p>
+                </div>
+
+                <div class="description-section mb-5">
+                    <h5 class="fw-bold font-outfit text-dark mb-3">Product Description</h5>
+                    <div class="text-muted fw-medium lh-lg" style="font-size: 0.95rem;">
+                        {{ product.description|linebreaks }}
+                    </div>
+                </div>
+
+                <div class="action-section mb-5">
+                    {% if product.stock > 0 or product.is_preorder %}
+                    <form action="{% url 'store:cart_add' product.id %}" method="post" class="add-to-cart-form">
+                        {% csrf_token %}
+                        <div class="d-grid">
+                            <button type="submit"
+                                class="place-order-btn text-decoration-none font-outfit py-3 shadow-lg hover-lift">
+                                <i class="fas fa-shopping-bag me-2"></i>
+                                <span>Add to Cart</span>
+                            </button>
+                        </div>
+                    </form>
+                    {% else %}
+                    <div class="d-grid">
+                        <button type="button" class="place-order-btn text-decoration-none font-outfit py-3 shadow-lg" disabled style="opacity: 0.5; cursor: not-allowed;">
+                            <i class="fas fa-times me-2"></i>
+                            <span>Out of Stock</span>
+                        </button>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Trust Badges Section -->
+                <div class="trust-container-detail p-4 rounded-4 bg-white border shadow-sm">
+                    <div class="row g-4">
+                        <div class="col-6">
+                            <div class="d-flex align-items-center">
+                                {% if product.stock > 0 %}
+                                <div class="icon-box-sm bg-success-light text-success me-3">
+                                    <i class="fas fa-check"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0 fw-bold smaller text-dark">In Stock</h6>
+                                    <p class="mb-0 smaller text-muted">{{ product.stock }} available</p>
+                                </div>
+                                {% elif product.is_preorder %}
+                                <div class="icon-box-sm bg-warning-light text-warning me-3">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0 fw-bold smaller text-dark">Pre-Order</h6>
+                                    <p class="mb-0 smaller text-muted">Coming Soon</p>
+                                </div>
+                                {% else %}
+                                <div class="icon-box-sm bg-danger-light text-danger me-3">
+                                    <i class="fas fa-times"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0 fw-bold smaller text-dark">Out of Stock</h6>
+                                    <p class="mb-0 smaller text-muted">Currently unavailable</p>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="d-flex align-items-center">
+                                <div class="icon-box-sm bg-primary-light text-primary me-3">
+                                    <i class="fas fa-truck"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0 fw-bold smaller text-dark">Cash on Delivery</h6>
+                                    <p class="mb-0 smaller text-muted">Pay at doorstep</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="d-flex align-items-center">
+                                <div class="icon-box-sm bg-warning-light text-warning me-3">
+                                    <i class="fas fa-shield-alt"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0 fw-bold smaller text-dark">Nobyo Shield</h6>
+                                    <p class="mb-0 smaller text-muted">Quality Guarantee</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="d-flex align-items-center">
+                                <div class="icon-box-sm bg-info-light text-info me-3">
+                                    <i class="fas fa-sync-alt"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0 fw-bold smaller text-dark">Simple Returns</h6>
+                                    <p class="mb-0 smaller text-muted">30-day window</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .font-outfit {
+        font-family: 'Outfit', sans-serif;
+    }
+
+    .smaller {
+        font-size: 0.8rem;
+    }
+
+    .bg-success-light {
+        background: rgba(0, 184, 148, 0.1);
+    }
+
+    .bg-primary-light {
+        background: rgba(52, 152, 219, 0.1);
+    }
+
+    .bg-warning-light {
+        background: rgba(243, 156, 18, 0.1);
+    }
+
+    .bg-info-light {
+        background: rgba(9, 132, 227, 0.1);
+    }
+
+    .bg-danger-light {
+        background: rgba(220, 53, 69, 0.1);
+    }
+
+    .icon-box-sm {
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        font-size: 0.85rem;
+    }
+
+    .hover-lift-lg:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15) !important;
+    }
+
+    .hover-dark:hover {
+        color: #1a1a1a !important;
+    }
+
+    .transition-base {
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .object-fit-cover {
+        object-fit: cover;
+    }
+
+    .trust-container-detail {
+        background: linear-gradient(145deg, #ffffff, #f9fbfd);
+    }
+</style>
+{% endblock %}

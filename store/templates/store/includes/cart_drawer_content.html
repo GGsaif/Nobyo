@@ -1,0 +1,101 @@
+<!-- Cart View Content -->
+<div id="cartView" class="flex-grow-1 overflow-auto py-2">
+    <div class="px-3">
+        {% for item in cart %}
+        <div class="drawer-item d-flex align-items-center mb-3 p-3 bg-white border rounded-3 shadow-sm">
+            <div class="drawer-item-img shadow-sm">
+                {% if item.product.image %}
+                <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}">
+                {% else %}
+                <div class="bg-light h-100 w-100 d-flex align-items-center justify-content-center">
+                    <i class="fas fa-image text-muted opacity-25"></i>
+                </div>
+                {% endif %}
+            </div>
+            <div class="ms-3 flex-grow-1">
+                <div class="d-flex justify-content-between align-items-start mb-1">
+                    <h6 class="fw-bold small mb-0 font-outfit text-dark">{{ item.product.name }}</h6>
+                    <button type="button" class="btn btn-sm text-muted p-0 border-0 bg-transparent hover-danger"
+                        onclick="removeFromDrawer({{ item.product.id }})">
+                        <i class="fas fa-times smaller"></i>
+                    </button>
+                </div>
+                <div class="text-muted smaller mb-3 fw-medium">৳{{ item.price }}</div>
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="drawer-qty-group">
+                        <button type="button" class="border-0 bg-transparent"
+                            onclick="updateDrawerQty({{ item.product.id }}, {{ item.quantity|add:'-1' }})">
+                            <i class="fas fa-minus smaller"></i>
+                        </button>
+                        <span class="px-2 font-outfit">{{ item.quantity }}</span>
+                        <button type="button" class="border-0 bg-transparent"
+                            onclick="updateDrawerQty({{ item.product.id }}, {{ item.quantity|add:'1' }})">
+                            <i class="fas fa-plus smaller"></i>
+                        </button>
+                    </div>
+                    <span class="fw-bold text-dark font-outfit">৳{{ item.total_price }}</span>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="text-center py-5">
+            <div class="mb-4 opacity-25">
+                <i class="fas fa-shopping-bag fa-4x"></i>
+            </div>
+            <h6 class="fw-bold font-outfit">Your cart is empty</h6>
+            <p class="text-muted small px-5">Looks like you haven't added anything to your cart yet.</p>
+            <button class="btn btn-dark btn-sm rounded-pill px-4 mt-3" data-bs-dismiss="offcanvas">Start
+                Shopping</button>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Order History View (Hidden by default) -->
+    <div id="orderView" class="flex-grow-1 overflow-auto p-3 d-none">
+        <div id="orderHistoryContent">
+            <!-- Loaded via AJAX -->
+            <div class="text-center py-5">
+                <div class="spinner-border spinner-border-sm text-accent" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer Content -->
+    {% if cart|length > 0 %}
+    <div id="cartFooter" class="p-4 bg-white border-top shadow-lg">
+        <div class="d-flex justify-content-between mb-2">
+            <span class="text-muted small fw-medium">Subtotal</span>
+            <span class="fw-bold text-dark font-outfit">৳{{ cart.get_total_price }}</span>
+        </div>
+        <div class="d-flex justify-content-between mb-4">
+            <h5 class="fw-bold font-outfit mb-0">Total</h5>
+            <h5 class="fw-bold text-accent font-outfit mb-0">৳{{ cart.get_total_price }}</h5>
+        </div>
+        <a href="{% url 'store:checkout' %}" class="place-order-btn text-decoration-none font-outfit">
+            <span>Proceed to Checkout</span>
+            <i class="fas fa-arrow-right"></i>
+        </a>
+        <div class="text-center mt-3">
+            <p class="smaller text-muted mb-0">Secure checkout powered by Nobyo</p>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Data for JS updates (hidden) -->
+    <div id="cart-data" style="display:none;" data-cart-count="{{ cart|length }}"></div>
+
+    <style>
+        .font-outfit {
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .smaller {
+            font-size: 0.7rem;
+        }
+
+        .hover-danger:hover {
+            color: #ff7675 !important;
+        }
+    </style>

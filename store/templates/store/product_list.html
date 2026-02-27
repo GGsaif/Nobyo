@@ -1,0 +1,124 @@
+{% extends 'store/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid px-lg-5 py-4">
+
+    <!-- Hero Banner (Placeholder for winter theme) -->
+    {% if not category and not request.GET.q %}
+    <div class="rounded-3 overflow-hidden mb-4 position-relative"
+        style="background: url('https://img.freepik.com/free-vector/winter-sale-banner-template_23-2148750838.jpg') no-repeat center center/cover; height: 300px;">
+        <div class="d-flex align-items-center justify-content-center h-100 bg-dark bg-opacity-25">
+            <h1 class="text-white display-3 fw-bold text-shadow"></h1>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Categories Scroll -->
+    <div class="mb-4">
+        <h5 class="fw-bold mb-3">Categories</h5>
+        <div class="category-scroll-container">
+            <a href="{% url 'store:product_list' %}" class="category-item {% if not category %}active{% endif %}">
+                <div class="category-icon">
+                    <i class="fas fa-th-large"></i>
+                </div>
+                <span class="category-label">All Products</span>
+            </a>
+            {% for c in categories %}
+            <a href="{{ c.get_absolute_url }}" class="category-item {% if category.slug == c.slug %}active{% endif %}">
+                <div class="category-icon">
+                    <!-- Placeholder icons based on name -->
+                    {% if 'Necklace' in c.name %}<i class="fas fa-gem"></i>
+                    {% elif 'Earrings' in c.name %}<i class="fas fa-heart"></i>
+                    {% elif 'Bracelet' in c.name %}<i class="fas fa-circle-notch"></i>
+                    {% else %}<i class="fas fa-star"></i>{% endif %}
+                </div>
+                <span class="category-label">{{ c.name }}</span>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Filters & Title -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <h4 class="fw-bold m-0">{% if category %}{{ category.name }}{% else %}Products{% endif %}</h4>
+        <div class="filters-bar m-0 ms-auto">
+            <div class="dropdown d-inline-block">
+                <button class="filter-btn dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                    {% if current_sort == 'price_asc' %}Price: Low to High
+                    {% elif current_sort == 'price_desc' %}Price: High to Low
+                    {% else %}Latest{% endif %}
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item {% if current_sort == 'newest' %}active{% endif %}"
+                            href="?{% if is_preorder %}preorder=true&{% endif %}{% if is_stock_out %}stock_out=true&{% endif %}sort=newest">Latest</a>
+                    </li>
+                    <li><a class="dropdown-item {% if current_sort == 'price_asc' %}active{% endif %}"
+                            href="?{% if is_preorder %}preorder=true&{% endif %}{% if is_stock_out %}stock_out=true&{% endif %}sort=price_asc">Price:
+                            Low to High</a></li>
+                    <li><a class="dropdown-item {% if current_sort == 'price_desc' %}active{% endif %}"
+                            href="?{% if is_preorder %}preorder=true&{% endif %}{% if is_stock_out %}stock_out=true&{% endif %}sort=price_desc">Price:
+                            High to Low</a></li>
+                </ul>
+            </div>
+            <a href="?{% if not is_preorder %}preorder=true{% else %}preorder=false{% endif %}{% if is_stock_out %}&stock_out=true{% endif %}&sort={{ current_sort }}"
+                class="filter-btn text-decoration-none d-inline-block {% if is_preorder %}active-filter{% endif %}">
+                <i class="fas fa-clock"></i> Preorder
+            </a>
+            <a href="?{% if is_preorder %}preorder=true&{% endif %}{% if not is_stock_out %}stock_out=true{% else %}stock_out=false{% endif %}&sort={{ current_sort }}"
+                class="filter-btn text-decoration-none d-inline-block text-danger {% if is_stock_out %}active-filter{% endif %}">
+                <i class="fas fa-box-open"></i> Stock Out
+            </a>
+            <a href="?" class="filter-btn text-decoration-none d-inline-block"><i class="fas fa-sync-alt"></i> Reset</a>
+        </div>
+    </div>
+
+    {% if categorized_products and not category %}
+    <!-- Category Sections -->
+    {% for group in categorized_products %}
+    <div class="category-section mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="fw-bold m-0">{{ group.category.name }}</h5>
+            <a href="{{ group.category.get_absolute_url }}" class="btn btn-sm btn-outline-dark rounded-pill px-3">View
+                All</a>
+        </div>
+        <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-2 g-md-3 g-lg-4">
+            {% for product in group.products %}
+            <div class="col">
+                {% include 'store/includes/product_card.html' with product=product %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+
+    <!-- All Products Section for Homepage -->
+    <div class="category-section mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-3 border-top pt-5">
+            <h5 class="fw-bold m-0">All Products</h5>
+        </div>
+        <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-2 g-md-3 g-lg-4">
+            {% for product in products %}
+            <div class="col">
+                {% include 'store/includes/product_card.html' with product=product %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% else %}
+    <!-- Standard Product Grid (Category Pages/Search) -->
+    <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-2 g-md-3 g-lg-4">
+        {% for product in products %}
+        <div class="col">
+            {% include 'store/includes/product_card.html' with product=product %}
+        </div>
+        {% empty %}
+        <div class="col-12 py-5 text-center">
+            <p class="text-muted">No products found.</p>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

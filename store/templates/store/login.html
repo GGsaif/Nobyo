@@ -1,0 +1,267 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In - Nobyo-নব্য</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --primary: #00b894;
+            --primary-glow: rgba(0, 184, 148, 0.3);
+            --dark-bg: #0d0e10;
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --glass-blur: 12px;
+        }
+
+        body,
+        html {
+            height: 100%;
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--dark-bg);
+            color: #fff;
+            overflow: hidden;
+        }
+
+        .font-outfit {
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .auth-wrapper {
+            height: 100vh;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            background: radial-gradient(circle at 10% 20%, rgba(0, 184, 148, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(108, 92, 231, 0.05) 0%, transparent 40%);
+        }
+
+        /* Abstract shapes for background depth */
+        .shape {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: 0;
+            opacity: 0.4;
+        }
+
+        .shape-1 {
+            width: 300px;
+            height: 300px;
+            background: var(--primary);
+            top: -100px;
+            left: -100px;
+        }
+
+        .shape-2 {
+            width: 400px;
+            height: 400px;
+            background: #6c5ce7;
+            bottom: -150px;
+            right: -150px;
+        }
+
+        .auth-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            padding: 3rem;
+            width: 100%;
+            max-width: 440px;
+            z-index: 1;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            animation: cardAppear 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes cardAppear {
+            from {
+                opacity: 0;
+                transform: translateY(20px) scale(0.98);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .brand-logo {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            padding: 3px;
+            background: linear-gradient(135deg, var(--primary) 0%, #00cec9 100%);
+            margin-bottom: 1.5rem;
+            box-shadow: 0 0 20px var(--primary-glow);
+        }
+
+        .brand-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 2px solid var(--dark-bg);
+        }
+
+        .form-label-custom {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 0.75rem;
+            display: block;
+        }
+
+        .auth-input {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 0.85rem 1rem;
+            color: #fff !important;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+        }
+
+        .auth-input:focus {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px var(--primary-glow);
+            outline: none;
+        }
+
+        .auth-input::placeholder {
+            color: rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-auth {
+            background: var(--primary);
+            color: #000;
+            font-weight: 700;
+            padding: 1rem;
+            border-radius: 12px;
+            border: none;
+            width: 100%;
+            font-size: 1rem;
+            letter-spacing: 0.5px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 10px 20px -5px var(--primary-glow);
+        }
+
+        .btn-auth:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px -5px var(--primary-glow);
+            filter: brightness(1.1);
+        }
+
+        .btn-auth:active {
+            transform: translateY(0);
+        }
+
+        .form-check-input {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-color: var(--card-border);
+        }
+
+        .form-check-input:checked {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .auth-link {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+
+        .auth-link:hover {
+            filter: brightness(1.2);
+        }
+
+        /* Autofill stabilization */
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover,
+        input:-webkit-autofill:focus,
+        input:-webkit-autofill:active {
+            -webkit-box-shadow: 0 0 0 30px #1a1c1e inset !important;
+            -webkit-text-fill-color: white !important;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="auth-wrapper">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+
+        <div class="auth-card text-center">
+            <div class="d-flex justify-content-center">
+                <div class="brand-logo">
+                    <img src="{% static 'store/logo.jpg' %}" alt="Nobyo Logo">
+                </div>
+            </div>
+
+            <h2 class="font-outfit fw-bold mb-1">Nobyo-<span style="color: var(--primary);">নব্য</span></h2>
+            <p class="text-white-50 small mb-5">Welcome back! Please enter your details.</p>
+
+            <form method="post" class="text-start">
+                {% csrf_token %}
+
+                {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-danger py-3 small text-center mb-4 border-0 rounded-4"
+                    style="background: rgba(255, 118, 117, 0.1); color: #ff7675;">
+                    <i class="fas fa-exclamation-circle me-2"></i>{{ message }}
+                </div>
+                {% endfor %}
+                {% endif %}
+
+                <div class="mb-4">
+                    <label class="form-label-custom">Username or Email</label>
+                    <input type="text" name="username" class="form-control auth-input" placeholder="Enter your username"
+                        required autofocus>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label-custom">Password</label>
+                    <input type="password" name="password" class="form-control auth-input" placeholder="••••••••"
+                        required>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mb-4 pb-2">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="rememberMe">
+                        <label class="form-check-label text-white-50 small" for="rememberMe">Remember me</label>
+                    </div>
+                    <a href="{% url 'reset_password' %}" class="auth-link small">Forgot password?</a>
+                </div>
+
+                <button type="submit" class="btn-auth font-outfit">Sign into Store</button>
+            </form>
+
+            <div class="mt-5 pt-2">
+                <p class="text-white small">New to Nobyo?
+                    <a href="{% url 'store:register' %}" class="auth-link ms-1">Create an account</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

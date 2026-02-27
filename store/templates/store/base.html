@@ -1,0 +1,361 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Nobyo-নব্য{% endblock %}</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'store/style.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body class="{% block body_class %}{% endblock %}">
+
+    {% if not hide_navbar %}
+    <!-- Offcanvas Mobile Menu -->
+    <div class="offcanvas offcanvas-start" tabindex="-1" id="mobileMenu" aria-labelledby="mobileMenuLabel">
+        <div class="offcanvas-header border-bottom">
+            <h5 class="offcanvas-title fw-bold" id="mobileMenuLabel">Categories</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body p-0">
+            <div class="list-group list-group-flush">
+                {% for category in categories %}
+                <a href="{{ category.get_absolute_url }}"
+                    class="list-group-item list-group-item-action d-flex align-items-center py-3 px-4 border-0 border-bottom">
+                    <div class="category-icon-wrapper me-3">
+                        {% if category.image %}
+                        <img src="{{ category.image.url }}" alt="{{ category.name }}" class="rounded-circle">
+                        {% else %}
+                        <div class="category-placeholder rounded-circle"></div>
+                        {% endif %}
+                    </div>
+                    <span class="fw-semibold text-dark flex-grow-1">{{ category.name }}</span>
+                    <i class="fas fa-chevron-right text-muted smaller"></i>
+                </a>
+                {% endfor %}
+
+                <div class="p-4 mt-auto">
+                    {% if user.is_authenticated %}
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="bg-light rounded-circle p-2 me-3">
+                            <i class="fas fa-user text-muted"></i>
+                        </div>
+                        <div>
+                            <div class="small text-muted">Logged in as</div>
+                            <div class="fw-bold">{{ user.username }}</div>
+                        </div>
+                    </div>
+                    <form action="{% url 'store:logout' %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-dark w-100 rounded-pill py-2">Logout</button>
+                    </form>
+                    {% else %}
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'store:login' %}" class="btn btn-dark rounded-pill py-2">Login</a>
+                        <a href="{% url 'store:register' %}" class="btn btn-outline-dark rounded-pill py-2">Register</a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg sticky-top bg-white border-bottom py-2 shadow-sm">
+        <div class="container-fluid px-lg-5">
+            <!-- Brand & Toggle -->
+            <div class="d-flex align-items-center">
+                <button class="btn btn-link text-dark me-2 p-1 border-0" type="button" data-bs-toggle="offcanvas"
+                    data-bs-target="#mobileMenu">
+                    <i class="fas fa-bars fa-lg"></i>
+                </button>
+                <a href="https://www.facebook.com/Nobyo.int" target="_blank" rel="noopener noreferrer"
+                    class="text-dark me-2 p-1" title="Chat with us">
+                    <i class="far fa-comment-dots fa-lg"></i>
+                </a>
+                <a class="navbar-brand d-flex align-items-center" href="{% url 'store:product_list' %}"
+                    style="line-height: 1.1;">
+                    <img src="{% static 'store/logo.jpg' %}" alt="Nobyo Logo" width="35" height="35"
+                        class="rounded-circle me-2">
+                    <span class="fw-bold fs-4">Nobyo-<span style="color: #00b894;">নব্য</span></span>
+                </a>
+            </div>
+
+            <!-- Search (Visible on Desktop) -->
+            <div class="search-bar-container mx-auto d-none d-lg-block w-50 max-w-500">
+                <form action="{% url 'store:product_list' %}" method="get" class="position-relative">
+                    <i class="fas fa-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+                    <input class="form-control search-input ps-5 py-2 rounded-pill" type="search"
+                        placeholder="Search products..." name="q" value="{{ request.GET.q }}">
+                </form>
+            </div>
+
+            <!-- Right Icons -->
+            <div class="d-flex align-items-center ms-auto">
+                <button type="button" class="nav-icon-link position-relative text-dark me-2 p-2 border-0 bg-transparent"
+                    data-bs-toggle="offcanvas" data-bs-target="#cartDrawer" onclick="updateDrawer()">
+                    <i class="fas fa-shopping-cart fa-lg"></i>
+                    <span id="navbar-cart-badge"
+                        class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger {% if cart|length == 0 %}d-none{% endif %}"
+                        style="font-size: 0.6rem;">
+                        {{ cart|length }}
+                    </span>
+                </button>
+
+                <div class="d-none d-md-flex align-items-center ms-3">
+                    {% if user.is_authenticated %}
+                    <span class="small fw-semibold text-muted me-2">{{ user.username }}</span>
+                    {% else %}
+                    <a href="{% url 'store:login' %}" class="btn btn-sm btn-dark rounded-pill px-3">Login</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Search Bar (Visible only on mobile below navbar) -->
+        <div class="container-fluid d-lg-none mt-2 px-3 pb-2">
+            <form action="{% url 'store:product_list' %}" method="get" class="position-relative w-100">
+                <i class="fas fa-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+                <input class="form-control search-input ps-5 py-2 rounded-pill border" type="search"
+                    placeholder="Search products..." name="q" value="{{ request.GET.q }}">
+            </form>
+        </div>
+    </nav>
+
+    <!-- Side Drawer (Cart & Orders) -->
+    <div class="offcanvas offcanvas-end border-0" tabindex="-1" id="cartDrawer" aria-labelledby="cartDrawerLabel">
+        <div class="offcanvas-header pb-0 flex-column align-items-stretch">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="offcanvas-title fw-bold font-outfit" id="cartDrawerLabel">Nobyo Bag</h5>
+                <button type="button" class="btn-close text-reset shadow-none" data-bs-dismiss="offcanvas"
+                    aria-label="Close"></button>
+            </div>
+            <!-- Tabs -->
+            <ul class="nav mini-nav-pills bg-light rounded-pill p-1 mb-3" id="drawerTabs" role="tablist">
+                <li class="nav-item flex-fill" role="presentation">
+                    <button class="nav-link active w-100 rounded-pill border-0" id="cart-tab" data-bs-toggle="pill"
+                        data-bs-target="#cart-pane" type="button" role="tab" onclick="switchTab('cart')">
+                        <i class="fas fa-shopping-cart me-2"></i>Cart(<span class="cart-count-val">{{ cart|length
+                            }}</span>)
+                    </button>
+                </li>
+                <li class="nav-item flex-fill" role="presentation">
+                    <button class="nav-link w-100 rounded-pill border-0" id="orders-tab" data-bs-toggle="pill"
+                        data-bs-target="#orders-pane" type="button" role="tab" onclick="switchTab('orders')">
+                        <i class="fas fa-history me-2"></i>Orders
+                    </button>
+                </li>
+            </ul>
+        </div>
+        <div class="offcanvas-body p-0 d-flex flex-column h-100">
+            <div id="drawerContent" class="flex-grow-1 d-flex flex-column">
+                <!-- Content loaded via AJAX -->
+                <div class="d-flex align-items-center justify-content-center h-100 mt-5">
+                    <div class="spinner-border text-accent spinner-border-sm" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <form id="drawer-remove-form" method="post" style="display:none;">
+        {% csrf_token %}
+    </form>
+
+    {% endif %}
+
+    <main class="min-vh-100">
+        {% block content %}{% endblock %}
+    </main>
+
+    {% if not hide_footer %}
+    <footer class="py-5 bg-dark text-white mt-5">
+        <div class="container px-4">
+            <div class="row g-4 mb-4">
+                <div class="col-lg-4">
+                    <h4 class="fw-bold mb-3">Nobyo-<span style="color: #00b894;">নব্য</span></h4>
+                    <p class="text-muted small">Quality products at wholesale prices. v2.1</p>
+                </div>
+                <div class="col-6 col-lg-2">
+                    <h6 class="fw-bold mb-3 text-uppercase small">Shop</h6>
+                    <ul class="list-unstyled small text-muted">
+                        <li><a href="#" class="text-reset text-decoration-none mb-2 d-block">All Products</a></li>
+                        <li><a href="#" class="text-reset text-decoration-none mb-2 d-block">Categories</a></li>
+                    </ul>
+                </div>
+                <div class="col-6 col-lg-2">
+                    <h6 class="fw-bold mb-3 text-uppercase small">Help</h6>
+                    <ul class="list-unstyled small text-muted">
+                        <li><a href="#" class="text-reset text-decoration-none mb-2 d-block">Track Order</a></li>
+                        <li><a href="#" class="text-reset text-decoration-none mb-2 d-block">FAQs</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-4">
+                    <h6 class="fw-bold mb-3 text-uppercase small">Newsletter</h6>
+                    <div class="input-group">
+                        <input type="text" class="form-control bg-transparent border-secondary text-white small"
+                            placeholder="Your email">
+                        <button class="btn btn-success" type="button">Subscribe</button>
+                    </div>
+                </div>
+            </div>
+            <hr class="border-secondary mb-4">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center small text-muted">
+                <p class="mb-2 mb-md-0">&copy; 2024 Nobyo-নব্য. All rights reserved.</p>
+                <div class="d-flex gap-3">
+                    <a href="#" class="text-reset"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="text-reset"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="text-reset"><i class="fab fa-twitter"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+    {% endif %}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        let currentTab = 'cart';
+
+        async function updateDrawer() {
+            const content = document.getElementById('drawerContent');
+            const baseUrl = currentTab === 'cart' ? '{% url "store:cart_drawer" %}' : '{% url "store:order_history" %}';
+            const url = `${baseUrl}${baseUrl.includes('?') ? '&' : '?'}t=${new Date().getTime()}`;
+
+            try {
+                const response = await fetch(url, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                if (response.ok) {
+                    const html = await response.text();
+                    content.innerHTML = html;
+
+                    // Update counts if in cart tab
+                    if (currentTab === 'cart') {
+                        const cartData = content.querySelector('#cart-data');
+                        if (cartData) {
+                            const count = cartData.dataset.cartCount;
+                            document.querySelectorAll('.cart-count-val').forEach(el => el.innerText = count);
+                            const badge = document.getElementById('navbar-cart-badge');
+                            if (badge) {
+                                badge.innerText = count;
+                                badge.classList.toggle('d-none', count == 0);
+                            }
+                        }
+                    }
+                }
+            } catch (err) {
+                console.error("Error loading drawer:", err);
+            }
+        }
+
+        function switchTab(tab) {
+            currentTab = tab;
+            // Update active states
+            document.querySelectorAll('#drawerTabs .nav-link').forEach(el => el.classList.remove('active'));
+            document.getElementById(`${tab}-tab`).classList.add('active');
+
+            // Show loading
+            document.getElementById('drawerContent').innerHTML = `
+                <div class="d-flex align-items-center justify-content-center h-100 mt-5">
+                    <div class="spinner-border text-accent spinner-border-sm" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            `;
+            updateDrawer();
+        }
+
+        async function updateDrawerQty(id, qty) {
+            if (qty < 1) return;
+            try {
+                const response = await fetch(`/cart/update/${id}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: `quantity=${qty}`
+                });
+                if (response.ok) updateDrawer();
+            } catch (err) { console.error(err); }
+        }
+
+        async function removeFromDrawer(id) {
+            try {
+                const response = await fetch(`/cart/remove/${id}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                if (response.ok) updateDrawer();
+            } catch (err) { console.error(err); }
+        }
+
+        function showToast(title, message, type = 'success') {
+            const toastContainer = document.getElementById('toastContainer');
+            if (!toastContainer) return;
+
+            const icon = type === 'success' ? 'fa-check-circle' : (type === 'danger' ? 'fa-exclamation-circle' : 'fa-info-circle');
+            const toastHtml = `
+                <div class="toast show animate-slide-in" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="4000">
+                    <div class="toast-header border-0 bg-transparent py-2">
+                        <i class="fas ${icon} text-${type} me-2"></i>
+                        <strong class="me-auto">${title}</strong>
+                        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                    <div class="toast-body pt-0 pb-3 small text-muted">
+                        ${message}
+                    </div>
+                </div>
+            `;
+            const div = document.createElement('div');
+            div.innerHTML = toastHtml;
+            const toastEl = div.querySelector('.toast');
+            toastContainer.appendChild(toastEl);
+
+            // Auto-remove after some time
+            setTimeout(() => {
+                toastEl.classList.add('hide');
+                setTimeout(() => toastEl.remove(), 500);
+            }, 4000);
+        }
+    </script>
+
+    <!-- Toast Container -->
+    <div id="toastContainer" class="toast-container position-fixed bottom-0 start-50 translate-middle-x p-3"
+        style="z-index: 2000;"></div>
+
+    <style>
+        .animate-slide-in {
+            animation: slideInUp 0.3s ease-out forwards;
+        }
+
+        @keyframes slideInUp {
+            from {
+                transform: translateY(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</body>
+
+</html>
