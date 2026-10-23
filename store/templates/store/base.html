@@ -6,6 +6,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Nobyo-নব্য{% endblock %}</title>
+    <script>
+        (function() {
+            var savedTheme = localStorage.getItem('color-theme');
+            var systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
+                document.documentElement.setAttribute('data-bs-theme', 'dark');
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.setAttribute('data-bs-theme', 'light');
+                document.documentElement.classList.remove('dark');
+            }
+        })();
+    </script>
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
@@ -52,6 +65,9 @@
                             <div class="fw-bold">{{ user.username }}</div>
                         </div>
                     </div>
+                    {% if user.is_staff %}
+                    <a href="{% url 'store:dashboard_index' %}" class="btn btn-outline-dark w-100 rounded-pill py-2 mb-2">Admin Dashboard</a>
+                    {% endif %}
                     <form action="{% url 'store:logout' %}" method="post">
                         {% csrf_token %}
                         <button type="submit" class="btn btn-dark w-100 rounded-pill py-2">Logout</button>
@@ -68,7 +84,7 @@
     </div>
 
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg sticky-top bg-white border-bottom py-2 shadow-sm">
+    <nav class="navbar navbar-expand-lg sticky-top border-bottom py-2 shadow-sm">
         <div class="container-fluid px-lg-5">
             <!-- Brand & Toggle -->
             <div class="d-flex align-items-center">
@@ -99,6 +115,13 @@
 
             <!-- Right Icons -->
             <div class="d-flex align-items-center ms-auto">
+                <!-- Dark / Light Mode Toggle Button -->
+                <button type="button" id="theme-toggle" class="theme-toggle-btn nav-icon-link me-2 border-0 bg-transparent"
+                    title="Toggle dark / light mode" aria-label="Toggle theme">
+                    <i id="theme-toggle-dark-icon" class="fas fa-moon fa-lg"></i>
+                    <i id="theme-toggle-light-icon" class="fas fa-sun fa-lg d-none"></i>
+                </button>
+
                 <button type="button" class="nav-icon-link position-relative text-dark me-2 p-2 border-0 bg-transparent"
                     data-bs-toggle="offcanvas" data-bs-target="#cartDrawer" onclick="updateDrawer()">
                     <i class="fas fa-shopping-cart fa-lg"></i>
@@ -112,6 +135,9 @@
                 <div class="d-none d-md-flex align-items-center ms-3">
                     {% if user.is_authenticated %}
                     <span class="small fw-semibold text-muted me-2">{{ user.username }}</span>
+                    {% if user.is_staff %}
+                    <a href="{% url 'store:dashboard_index' %}" class="btn btn-sm btn-outline-dark rounded-pill px-3 me-2">Dashboard</a>
+                    {% endif %}
                     {% else %}
                     <a href="{% url 'store:login' %}" class="btn btn-sm btn-dark rounded-pill px-3">Login</a>
                     {% endif %}
@@ -333,6 +359,41 @@
                 setTimeout(() => toastEl.remove(), 500);
             }, 4000);
         }
+
+        // Theme Toggle Logic
+        (function() {
+            var themeToggleBtn = document.getElementById('theme-toggle');
+            var darkIcon = document.getElementById('theme-toggle-dark-icon');
+            var lightIcon = document.getElementById('theme-toggle-light-icon');
+
+            function applyTheme(theme) {
+                if (theme === 'dark') {
+                    document.documentElement.setAttribute('data-bs-theme', 'dark');
+                    document.documentElement.classList.add('dark');
+                    localStorage.setItem('color-theme', 'dark');
+                    if (darkIcon) darkIcon.classList.add('d-none');
+                    if (lightIcon) lightIcon.classList.remove('d-none');
+                    if (themeToggleBtn) themeToggleBtn.setAttribute('title', 'Switch to Light Mode');
+                } else {
+                    document.documentElement.setAttribute('data-bs-theme', 'light');
+                    document.documentElement.classList.remove('dark');
+                    localStorage.setItem('color-theme', 'light');
+                    if (darkIcon) darkIcon.classList.remove('d-none');
+                    if (lightIcon) lightIcon.classList.add('d-none');
+                    if (themeToggleBtn) themeToggleBtn.setAttribute('title', 'Switch to Dark Mode');
+                }
+            }
+
+            var currentTheme = localStorage.getItem('color-theme') || (document.documentElement.getAttribute('data-bs-theme') === 'dark' ? 'dark' : 'light');
+            applyTheme(currentTheme);
+
+            if (themeToggleBtn) {
+                themeToggleBtn.addEventListener('click', function() {
+                    var isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark' || document.documentElement.classList.contains('dark');
+                    applyTheme(isDark ? 'light' : 'dark');
+                });
+            }
+        })();
     </script>
 
     <!-- Toast Container -->

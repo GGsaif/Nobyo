@@ -9,8 +9,9 @@ from django.db.models import Q, Prefetch
 from django.db import transaction
 import logging
 
+from django.contrib.admin.views.decorators import staff_member_required
 from .models import Category, Product, Order, OrderItem
-from .forms import OrderCreateForm, UserRegisterForm
+from .forms import OrderCreateForm, UserRegisterForm, ProductForm
 from .cart import Cart
 
 logger = logging.getLogger(__name__)
@@ -187,7 +188,7 @@ def cart_drawer(request):
     cart = Cart(request)
     return render(request, 'store/includes/cart_drawer_content.html', {'cart': cart})
 
-@login_required
+@login_required(login_url='store:login')
 def checkout(request):
     try:
         cart = Cart(request)
@@ -248,17 +249,26 @@ def checkout(request):
         return redirect('store:cart_detail')
 
 def register(request):
+    if request.user.is_authenticated:
+        next_url = request.POST.get('next') or request.GET.get('next') or 'store:product_list'
+        return redirect(next_url)
+
     if request.method == 'POST':
         form = UserRegisterForm(request.POST)
         if form.is_valid():
             user = form.save()
             login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-            return redirect('store:product_list')
+            next_url = request.POST.get('next') or request.GET.get('next') or 'store:product_list'
+            return redirect(next_url)
     else:
         form = UserRegisterForm()
     return render(request, 'store/register.html', {'form': form})
 
 def login_view(request):
+    if request.user.is_authenticated:
+        next_url = request.POST.get('next') or request.GET.get('next') or 'store:product_list'
+        return redirect(next_url)
+
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
@@ -268,7 +278,7 @@ def login_view(request):
             logger.info(f"User {username} logged in successfully")
             messages.success(request, f"Welcome back, {user.get_full_name() or username}!")
             # Redirect to next parameter or product list
-            next_url = request.GET.get('next', 'store:product_list')
+            next_url = request.POST.get('next') or request.GET.get('next') or 'store:product_list'
             return redirect(next_url)
         else:
             logger.warning(f"Failed login attempt for username: {username}")
@@ -280,7 +290,7 @@ def logout_view(request):
     logout(request)
     return redirect('store:product_list')
 
-@login_required
+@login_required(login_url='store:login')
 def order_history(request):
     try:
         # Optimize query with prefetch_related
@@ -310,3 +320,43 @@ def order_history(request):
 def order_detail(request, order_id):
     order = get_object_or_404(Order, id=order_id, user=request.user)
     return render(request, 'store/order_detail.html', {'order': order})
+
+@staff_member_required
+def dashboard_index(request):
+    total_products = Product.objects.count()
+    active_products = Product.objects.filter(available=True).count()
+    total_orders = Order.objects.count()
+    revenue = sum(order.get_total_cost() for order in Order.objects.all())
+    
+    context = {
+        'total_products': total_products,
+        'active_products': active_products,
+        'total_orders': total_orders,
+        'revenue': revenue,
+    }
+    return render(request, 'store/dashboard/index.html', context)
+
+@staff_member_required
+def dashboard_item_list(request):
+    products = Product.objects.all().order_by('-created')
+    context = {'products': products}
+    return render(request, 'store/dashboard/item_list.html', context)
+
+@staff_member_required
+def dashboard_item_add(request):
+    if request.method == 'POST':
+        form = ProductForm(request.POST, request.FILES)
+        if form.is_valid():
+            product = form.save()
+            messages.success(request, 'Product created successfully!')
+            return redirect('store:dashboard_item_list')
+    else:
+        form = ProductForm()
+        
+    categories = Category.objects.all()
+    context = {
+        'form': form,
+        'categories': categories,
+    }
+    return render(request, 'store/dashboard/item_form.html', context)
+

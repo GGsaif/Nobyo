@@ -220,6 +220,7 @@
 
             <form method="post" class="text-start">
                 {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.GET.next }}">
 
                 {% if messages %}
                 {% for message in messages %}
@@ -255,7 +256,7 @@
 
             <div class="mt-5 pt-2">
                 <p class="text-white small">New to Nobyo?
-                    <a href="{% url 'store:register' %}" class="auth-link ms-1">Create an account</a>
+                    <a href="{% url 'store:register' %}{% if request.GET.next %}?next={{ request.GET.next }}{% endif %}" class="auth-link ms-1">Create an account</a>
                 </p>
             </div>
         </div>

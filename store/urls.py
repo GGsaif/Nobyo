@@ -18,4 +18,9 @@ urlpatterns = [
     path('order-history/', views.order_history, name='order_history'),
     path('cart/drawer/', views.cart_drawer, name='cart_drawer'),
     path('order-detail/<int:order_id>/', views.order_detail, name='order_detail'),
+    
+    # Dashboard Routes
+    path('admin-dashboard/', views.dashboard_index, name='dashboard_index'),
+    path('admin-dashboard/products/', views.dashboard_item_list, name='dashboard_item_list'),
+    path('admin-dashboard/products/add/', views.dashboard_item_add, name='dashboard_item_add'),
 ]

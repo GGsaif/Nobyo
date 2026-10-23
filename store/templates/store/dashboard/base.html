@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-gray-50 dark:bg-gray-900">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Admin Dashboard{% endblock %}</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0fdfa',
+                            100: '#ccfbf1',
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            900: '#134e4a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #475569;
+        }
+        
+        .sidebar-transition {
+            transition: transform 0.3s ease-in-out;
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="h-full text-gray-800 dark:text-gray-200">
+
+    <div class="flex h-screen overflow-hidden">
+        
+        <!-- Sidebar Backdrop (Mobile) -->
+        <div id="sidebar-backdrop" class="fixed inset-0 z-20 bg-gray-900/50 hidden lg:hidden" onclick="toggleSidebar()"></div>
+
+        <!-- Sidebar -->
+        <aside id="sidebar" class="sidebar-transition fixed inset-y-0 left-0 z-30 w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transform -translate-x-full lg:relative lg:translate-x-0 flex flex-col">
+            <!-- Logo -->
+            <div class="flex items-center justify-center h-16 border-b border-gray-200 dark:border-gray-700 px-4">
+                <a href="#" class="flex items-center space-x-2">
+                    <div class="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center text-white font-bold text-xl">
+                        N
+                    </div>
+                    <span class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-blue-500">Nobyo Admin</span>
+                </a>
+            </div>
+
+            <!-- Navigation Links -->
+            <div class="flex-1 overflow-y-auto py-4 px-3 space-y-1">
+                <p class="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 mt-4">Main</p>
+                <a href="{% url 'store:dashboard_index' %}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 {% if request.resolver_match.url_name == 'dashboard_index' %}bg-primary-50 text-primary-600 dark:bg-gray-700 dark:text-primary-500{% else %}text-gray-700 dark:text-gray-300{% endif %}">
+                    <i class="fa-solid fa-chart-pie w-6"></i>
+                    Dashboard
+                </a>
+
+                <p class="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 mt-6">Catalog</p>
+                <a href="{% url 'store:dashboard_item_list' %}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 {% if request.resolver_match.url_name == 'dashboard_item_list' %}bg-primary-50 text-primary-600 dark:bg-gray-700 dark:text-primary-500{% else %}text-gray-700 dark:text-gray-300{% endif %}">
+                    <i class="fa-solid fa-box w-6"></i>
+                    Products
+                </a>
+                <a href="{% url 'store:dashboard_item_add' %}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 {% if request.resolver_match.url_name == 'dashboard_item_add' %}bg-primary-50 text-primary-600 dark:bg-gray-700 dark:text-primary-500{% else %}text-gray-700 dark:text-gray-300{% endif %}">
+                    <i class="fa-solid fa-plus w-6"></i>
+                    Add Product
+                </a>
+                <a href="#" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">
+                    <i class="fa-solid fa-tags w-6"></i>
+                    Categories
+                </a>
+
+                <p class="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 mt-6">Sales</p>
+                <a href="#" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">
+                    <i class="fa-solid fa-cart-shopping w-6"></i>
+                    Orders
+                    <span class="ml-auto bg-red-100 text-red-600 py-0.5 px-2 rounded-full text-xs font-bold">4</span>
+                </a>
+                <a href="#" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">
+                    <i class="fa-regular fa-user w-6"></i>
+                    Customers
+                </a>
+
+                <p class="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 mt-6">Settings</p>
+                <a href="#" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">
+                    <i class="fa-solid fa-gear w-6"></i>
+                    General Settings
+                </a>
+            </div>
+            
+            <!-- User Section / Bottom Sidebar -->
+            <div class="p-4 border-t border-gray-200 dark:border-gray-700">
+                <a href="{% url 'store:product_list' %}" class="flex items-center px-3 py-2 text-sm font-medium rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 dark:hover:text-gray-300 transition-colors">
+                    <i class="fa-solid fa-arrow-right-from-bracket w-6"></i>
+                    Exit to Store
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content Wrapper -->
+        <div class="flex-1 flex flex-col min-w-0 bg-gray-50 dark:bg-gray-900 border-l border-gray-200 dark:border-gray-700">
+            
+            <!-- Top Navbar -->
+            <header class="h-16 flex items-center justify-between px-4 sm:px-6 lg:px-8 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 z-10 w-full">
+                
+                <div class="flex items-center">
+                    <!-- Mobile Menu Button -->
+                    <button id="mobile-menu-btn" onclick="toggleSidebar()" class="lg:hidden p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none">
+                        <i class="fa-solid fa-bars text-xl"></i>
+                    </button>
+
+                    <!-- Search -->
+                    <div class="hidden sm:flex max-w-md ml-4">
+                        <label for="search" class="sr-only">Search</label>
+                        <div class="relative text-gray-400 focus-within:text-gray-600 dark:focus-within:text-gray-300">
+                            <div class="pointer-events-none absolute inset-y-0 left-0 pl-3 flex items-center">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                            </div>
+                            <input id="search" class="block w-full bg-gray-100 dark:bg-gray-700 border-transparent rounded-lg py-2 pl-10 pr-3 text-sm placeholder-gray-500 dark:text-white focus:border-primary-500 focus:ring-primary-500 focus:bg-white dark:focus:bg-gray-900 transition-colors" placeholder="Search orders, products..." type="search" name="search">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Navbar actions -->
+                <div class="flex items-center space-x-4">
+                    
+                    <!-- Dark Mode Toggle -->
+                    <button id="theme-toggle" class="p-2 text-gray-500 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none transition-colors">
+                        <i id="theme-toggle-dark-icon" class="fa-solid fa-moon hidden text-lg"></i>
+                        <i id="theme-toggle-light-icon" class="fa-solid fa-sun hidden text-lg"></i>
+                    </button>
+
+                    <!-- Notifications -->
+                    <button class="relative p-2 text-gray-500 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none transition-colors">
+                        <span class="absolute top-1 right-1.5 block h-2.5 w-2.5 rounded-full bg-red-400 ring-2 ring-white dark:ring-gray-800"></span>
+                        <i class="fa-regular fa-bell text-lg"></i>
+                    </button>
+
+                    <!-- Profile dropdown -->
+                    <div class="relative ml-2">
+                        <button id="user-menu-btn" class="flex items-center max-w-xs text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800" aria-expanded="false" aria-haspopup="true">
+                            <img class="h-8 w-8 rounded-full object-cover border-2 border-gray-200 dark:border-gray-700" src="https://ui-avatars.com/api/?name=Admin+User&background=0D8ABC&color=fff" alt="User avatar">
+                        </button>
+                        
+                        <!-- Dropdown menu -->
+                        <div id="user-menu" class="hidden absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white dark:bg-gray-700 ring-1 ring-black ring-opacity-5 origin-top-right transform transition-all duration-200 scale-95 opacity-0 z-50">
+                            <div class="px-4 py-2 border-b border-gray-100 dark:border-gray-600">
+                                <p class="text-sm text-gray-700 dark:text-gray-200 font-medium">Admin User</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 truncate">admin@nobyo.com</p>
+                            </div>
+                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600">Your Profile</a>
+                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600">Settings</a>
+                            <div class="border-t border-gray-100 dark:border-gray-600"></div>
+                            <a href="{% url 'store:product_list' %}" class="block px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-600">Sign out</a>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Main Content Area -->
+            <main class="flex-1 overflow-y-auto w-full bg-gray-50 dark:bg-gray-900 px-4 sm:px-6 lg:px-8 py-8">
+                {% block content %}
+                <!-- Dynamic Content Goes Here -->
+                {% endblock %}
+            </main>
+            
+        </div>
+    </div>
+
+    <!-- Base Scripts -->
+    <script>
+        // Dark Mode Logic
+        var themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
+        var themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
+
+        // Change the icons inside the button based on previous settings
+        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            themeToggleLightIcon.classList.remove('hidden');
+            document.documentElement.classList.add('dark');
+        } else {
+            themeToggleDarkIcon.classList.remove('hidden');
+        }
+
+        var themeToggleBtn = document.getElementById('theme-toggle');
+
+        themeToggleBtn.addEventListener('click', function() {
+            themeToggleDarkIcon.classList.toggle('hidden');
+            themeToggleLightIcon.classList.toggle('hidden');
+
+            if (localStorage.getItem('color-theme')) {
+                if (localStorage.getItem('color-theme') === 'light') {
+                    document.documentElement.classList.add('dark');
+                    localStorage.setItem('color-theme', 'dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                    localStorage.setItem('color-theme', 'light');
+                }
+            } else {
+                if (document.documentElement.classList.contains('dark')) {
+                    document.documentElement.classList.remove('dark');
+                    localStorage.setItem('color-theme', 'light');
+                } else {
+                    document.documentElement.classList.add('dark');
+                    localStorage.setItem('color-theme', 'dark');
+                }
+            }
+        });
+
+        // Sidebar Toggle for Mobile
+        const sidebar = document.getElementById('sidebar');
+        const sidebarBackdrop = document.getElementById('sidebar-backdrop');
+        
+        function toggleSidebar() {
+            sidebar.classList.toggle('-translate-x-full');
+            sidebarBackdrop.classList.toggle('hidden');
+        }
+
+        // Profile Dropdown Toggle
+        const userMenuBtn = document.getElementById('user-menu-btn');
+        const userMenu = document.getElementById('user-menu');
+        
+        userMenuBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (userMenu.classList.contains('hidden')) {
+                userMenu.classList.remove('hidden');
+                setTimeout(() => {
+                    userMenu.classList.remove('scale-95', 'opacity-0');
+                    userMenu.classList.add('scale-100', 'opacity-100');
+                }, 10);
+            } else {
+                userMenu.classList.remove('scale-100', 'opacity-100');
+                userMenu.classList.add('scale-95', 'opacity-0');
+                setTimeout(() => {
+                    userMenu.classList.add('hidden');
+                }, 200);
+            }
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', () => {
+            if (!userMenu.classList.contains('hidden')) {
+                userMenu.classList.remove('scale-100', 'opacity-100');
+                userMenu.classList.add('scale-95', 'opacity-0');
+                setTimeout(() => {
+                    userMenu.classList.add('hidden');
+                }, 200);
+            }
+        });
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -4,13 +4,10 @@
 {% block content %}
 <div class="container-fluid px-lg-5 py-4">
 
-    <!-- Hero Banner (Placeholder for winter theme) -->
+    <!-- Hero Banner -->
     {% if not category and not request.GET.q %}
-    <div class="rounded-3 overflow-hidden mb-4 position-relative"
-        style="background: url('https://img.freepik.com/free-vector/winter-sale-banner-template_23-2148750838.jpg') no-repeat center center/cover; height: 300px;">
-        <div class="d-flex align-items-center justify-content-center h-100 bg-dark bg-opacity-25">
-            <h1 class="text-white display-3 fw-bold text-shadow"></h1>
-        </div>
+    <div class="rounded-4 overflow-hidden mb-4 position-relative hero-banner"
+        style="background-image: url('{% static 'store/hero_banner.png' %}');">
     </div>
     {% endif %}
 

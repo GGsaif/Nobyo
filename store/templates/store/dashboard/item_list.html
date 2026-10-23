@@ -1,0 +1,217 @@
+{% extends 'store/dashboard/base.html' %}
+
+{% block title %}Products List | Nobyo Admin{% endblock %}
+
+{% block content %}
+<div class="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Products</h1>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Manage all your products, inventory, and pricing.</p>
+    </div>
+    
+    <div class="flex space-x-3">
+        <button class="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition-colors">
+            <i class="fa-solid fa-file-export mr-1.5"></i> Export
+        </button>
+        <a href="{% url 'store:dashboard_item_add' %}" class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition-colors flex items-center">
+            <i class="fa-solid fa-plus mr-1.5"></i> Add Product
+        </a>
+    </div>
+</div>
+
+<!-- Product Table Section -->
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+    
+    <!-- Table Toolbar -->
+    <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        
+        <!-- Search -->
+        <div class="relative w-full md:w-80">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <i class="fa-solid fa-magnifying-glass text-gray-400"></i>
+            </div>
+            <input type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Search products...">
+        </div>
+        
+        <!-- Filters -->
+        <div class="flex items-center space-x-3 w-full md:w-auto">
+            <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
+                <option value="">Category</option>
+                <option value="electronics">Electronics</option>
+                <option value="clothing">Clothing</option>
+                <option value="books">Books</option>
+            </select>
+            
+            <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
+                <option value="">Status</option>
+                <option value="active">Active</option>
+                <option value="draft">Draft</option>
+            </select>
+            
+            <button class="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 px-3 py-2.5 rounded-lg text-sm shadow-sm transition-colors relative" title="More Filters">
+                <i class="fa-solid fa-filter"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Active Filters / Bulk Actions -->
+    <div id="bulk-actions" class="hidden p-3 bg-primary-50 dark:bg-gray-700/50 border-b border-primary-100 dark:border-gray-600 flex justify-between items-center transition-all">
+        <span class="text-sm font-medium text-primary-800 dark:text-primary-300"><span id="selected-count">1</span> items selected</span>
+        <div class="flex space-x-2">
+            <button class="text-xs px-3 py-1.5 border border-red-200 dark:border-red-800/50 bg-white dark:bg-gray-800 text-red-600 dark:text-red-400 rounded hover:bg-red-50 dark:hover:bg-red-900/30 font-medium">Delete</button>
+            <button class="text-xs px-3 py-1.5 border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-50 dark:hover:bg-gray-700 font-medium">Publish</button>
+            <button class="text-xs px-3 py-1.5 border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-50 dark:hover:bg-gray-700 font-medium">Draft</button>
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700/50 dark:text-gray-400">
+                <tr>
+                    <th scope="col" class="p-4 w-12">
+                        <div class="flex items-center">
+                            <input id="checkbox-all" type="checkbox" class="w-4 h-4 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 dark:focus:ring-primary-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+                            <label for="checkbox-all" class="sr-only">checkbox</label>
+                        </div>
+                    </th>
+                    <th scope="col" class="px-6 py-3">Product</th>
+                    <th scope="col" class="px-6 py-3">Category</th>
+                    <th scope="col" class="px-6 py-3">Price</th>
+                    <th scope="col" class="px-6 py-3">Stock</th>
+                    <th scope="col" class="px-6 py-3">Status</th>
+                    <th scope="col" class="px-6 py-3 text-right">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Row 1 -->
+                <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                    <td class="w-4 p-4">
+                        <div class="flex items-center">
+                            <input type="checkbox" class="row-checkbox w-4 h-4 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 dark:focus:ring-primary-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+                            <label class="sr-only">checkbox</label>
+                        </div>
+                    </td>
+                    <th scope="row" class="flex items-center px-6 py-4 text-gray-900 whitespace-nowrap dark:text-white">
+                        <img class="w-10 h-10 rounded-lg object-cover" src="https://via.placeholder.com/150" alt="Product image">
+                        <div class="pl-3">
+                            <div class="text-base font-semibold">Premium Wireless Headphones</div>
+                            <div class="font-normal text-gray-500 dark:text-gray-400 text-xs mt-0.5">SKU: WH-1002</div>
+                        </div>
+                    </th>
+                    <td class="px-6 py-4">Electronics</td>
+                    <td class="px-6 py-4 font-bold text-gray-900 dark:text-white">৳ 12,500</td>
+                    <td class="px-6 py-4">
+                        <div class="flex items-center">
+                            <div class="h-2.5 w-2.5 rounded-full bg-green-500 mr-2"></div> 42
+                        </div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-1rounded-full dark:bg-green-900/30 dark:text-green-400 border border-green-200 dark:border-green-800/10 rounded-full">Active</span>
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                        <!-- Action Dropdown Trigger (simulated) -->
+                        <div class="flex justify-end space-x-2">
+                            <a href="#" class="font-medium text-gray-500 hover:text-primary-600 dark:hover:text-primary-500 shadow-sm p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700" title="Edit">
+                                <i class="fa-regular fa-pen-to-square"></i>
+                            </a>
+                            <a href="#" class="font-medium text-gray-500 hover:text-blue-600 shadow-sm p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700" title="View">
+                                <i class="fa-regular fa-eye"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                
+                <!-- Row 2 -->
+                <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                    <td class="w-4 p-4">
+                        <div class="flex items-center">
+                            <input type="checkbox" class="row-checkbox w-4 h-4 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 dark:focus:ring-primary-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+                        </div>
+                    </td>
+                    <th scope="row" class="flex items-center px-6 py-4 text-gray-900 whitespace-nowrap dark:text-white">
+                        <img class="w-10 h-10 rounded-lg object-cover" src="https://via.placeholder.com/150" alt="Product image">
+                        <div class="pl-3">
+                            <div class="text-base font-semibold">Minimalist Cotton T-Shirt</div>
+                            <div class="font-normal text-gray-500 dark:text-gray-400 text-xs mt-0.5">SKU: APP-T101</div>
+                        </div>
+                    </th>
+                    <td class="px-6 py-4">Clothing</td>
+                    <td class="px-6 py-4 font-bold text-gray-900 dark:text-white">৳ 850</td>
+                    <td class="px-6 py-4">
+                        <div class="flex items-center">
+                            <div class="h-2.5 w-2.5 rounded-full bg-red-500 mr-2"></div> 2
+                        </div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-1 rounded-full dark:bg-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600">Draft</span>
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                        <div class="flex justify-end space-x-2">
+                            <a href="#" class="font-medium text-gray-500 hover:text-primary-600 dark:hover:text-primary-500 shadow-sm p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700" title="Edit">
+                                <i class="fa-regular fa-pen-to-square"></i>
+                            </a>
+                            <a href="#" class="font-medium text-gray-500 hover:text-blue-600 shadow-sm p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700" title="View">
+                                <i class="fa-regular fa-eye"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Table Footer / Pagination -->
+    <nav class="flex items-center justify-between pt-4 pb-4 px-6 border-t border-gray-200 dark:border-gray-700">
+        <span class="text-sm font-normal text-gray-500 dark:text-gray-400">Showing <span class="font-semibold text-gray-900 dark:text-white">1-2</span> of <span class="font-semibold text-gray-900 dark:text-white">1,245</span></span>
+        <ul class="inline-flex -space-x-px text-sm h-8">
+            <li>
+                <a href="#" class="flex items-center justify-center px-3 h-8 ml-0 leading-tight text-gray-500 bg-white border border-gray-300 rounded-l-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">Previous</a>
+            </li>
+            <li>
+                <a href="#" aria-current="page" class="flex items-center justify-center px-3 h-8 text-primary-600 border border-gray-300 bg-primary-50 hover:bg-primary-100 hover:text-primary-700 dark:border-gray-700 dark:bg-gray-700 dark:text-white">1</a>
+            </li>
+            <li>
+                <a href="#" class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">2</a>
+            </li>
+            <li>
+                <a href="#" class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 rounded-r-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">Next</a>
+            </li>
+        </ul>
+    </nav>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Simple bulk selection logic
+    document.addEventListener("DOMContentLoaded", function () {
+        const selectAll = document.getElementById('checkbox-all');
+        const checkboxes = document.querySelectorAll('.row-checkbox');
+        const bulkActions = document.getElementById('bulk-actions');
+        const selectedCount = document.getElementById('selected-count');
+        
+        function updateBulkActions() {
+            const checked = document.querySelectorAll('.row-checkbox:checked').length;
+            if (checked > 0) {
+                bulkActions.classList.remove('hidden');
+                selectedCount.textContent = checked;
+            } else {
+                bulkActions.classList.add('hidden');
+                selectAll.checked = false;
+            }
+        }
+        
+        selectAll.addEventListener('change', function() {
+            checkboxes.forEach(cb => {
+                cb.checked = selectAll.checked;
+            });
+            updateBulkActions();
+        });
+        
+        checkboxes.forEach(cb => {
+            cb.addEventListener('change', updateBulkActions);
+        });
+    });
+</script>
+{% endblock %}

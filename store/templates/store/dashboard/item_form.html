@@ -1,0 +1,265 @@
+{% extends 'store/dashboard/base.html' %}
+
+{% block title %}Add Product | Nobyo Admin{% endblock %}
+
+{% block content %}
+<div class="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Add New Product</h1>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Create a new product listing in your store.</p>
+    </div>
+    
+    <div class="flex space-x-3">
+        <a href="{% url 'store:dashboard_item_list' %}" class="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition-colors">
+            Cancel
+        </a>
+        <button type="submit" form="product-form" class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition-colors flex items-center">
+            <i class="fa-solid fa-check mr-1.5"></i> Save Product
+        </button>
+    </div>
+</div>
+
+<form id="product-form" action="" method="POST" enctype="multipart/form-data" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    {% csrf_token %}
+    
+    <!-- Left Column: Main info -->
+    <div class="lg:col-span-2 space-y-6">
+        
+        <!-- General Information -->
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+            <h2 class="text-lg font-bold text-gray-900 dark:text-white mb-4">General Information</h2>
+            
+            <div class="space-y-4">
+                <div>
+                    <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Product Name <span class="text-red-500">*</span></label>
+                    <input type="text" id="name" name="name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="e.g. Awesome T-Shirt" required>
+                </div>
+                
+                <div>
+                    <label for="description" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Description</label>
+                    <!-- Rich Text Toolbar Simulation -->
+                    <div class="w-full border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 overflow-hidden">
+                        <div class="flex items-center justify-between px-3 py-2 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50">
+                            <div class="flex flex-wrap items-center space-x-1 sm:space-x-2">
+                                <button type="button" class="p-1.5 text-gray-500 rounded cursor-pointer hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-600">
+                                    <i class="fa-solid fa-bold"></i>
+                                </button>
+                                <button type="button" class="p-1.5 text-gray-500 rounded cursor-pointer hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-600">
+                                    <i class="fa-solid fa-italic"></i>
+                                </button>
+                                <button type="button" class="p-1.5 text-gray-500 rounded cursor-pointer hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-600">
+                                    <i class="fa-solid fa-underline"></i>
+                                </button>
+                                <div class="w-px h-4 bg-gray-300 dark:bg-gray-600 mx-1"></div>
+                                <button type="button" class="p-1.5 text-gray-500 rounded cursor-pointer hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-600">
+                                    <i class="fa-solid fa-list-ul"></i>
+                                </button>
+                                <button type="button" class="p-1.5 text-gray-500 rounded cursor-pointer hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-600">
+                                    <i class="fa-solid fa-link"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <textarea id="description" name="description" rows="6" class="block w-full px-3 py-2 text-sm text-gray-900 bg-white border-0 dark:bg-gray-800 focus:ring-0 dark:text-white dark:placeholder-gray-400" placeholder="Write a description..."></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Media / Images -->
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+            <h2 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Product Images</h2>
+            
+            <div id="dropzone" class="flex items-center justify-center w-full relative">
+                <label for="dropzone-file" class="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-primary-500 transition-colors">
+                    <div id="dropzone-content" class="flex flex-col items-center justify-center pt-5 pb-6">
+                        <i class="fa-solid fa-cloud-arrow-up text-4xl text-gray-400 mb-3"></i>
+                        <p class="mb-2 text-sm text-gray-500 dark:text-gray-400"><span class="font-semibold">Click to upload</span> or drag and drop</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">SVG, PNG, JPG or GIF (MAX. 800x400px)</p>
+                    </div>
+                    <input id="dropzone-file" name="image" type="file" class="hidden" accept="image/*" />
+                </label>
+                <!-- Image Preview Container -->
+                <div id="image-preview" class="hidden absolute inset-0 w-full h-full bg-white dark:bg-gray-800 rounded-lg flex flex-col items-center justify-center p-2 border border-gray-200 dark:border-gray-700">
+                    <img id="preview-img" class="max-h-48 object-contain rounded-md" src="" alt="Preview">
+                    <button type="button" id="remove-image" class="mt-2 text-sm text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 font-medium">Remove Image</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Pricing & Stock -->
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+            <h2 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Pricing & Inventory</h2>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label for="price" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Price (৳) <span class="text-red-500">*</span></label>
+                    <input type="number" id="price" name="price" step="0.01" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" required>
+                </div>
+                <div>
+                    <label for="discount" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Discount Price (Optional)</label>
+                    <input type="number" id="discount" name="discount" step="0.01" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
+                </div>
+                <div>
+                    <label for="stock" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Stock Quantity <span class="text-red-500">*</span></label>
+                    <input type="number" id="stock" name="stock" value="0" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" required>
+                </div>
+                <div>
+                    <label for="sku" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">SKU (Stock Keeping Unit)</label>
+                    <input type="text" id="sku" name="sku" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
+                </div>
+            </div>
+            
+            <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" name="available" value="" class="sr-only peer" checked>
+                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600"></div>
+                    <span class="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300">Available in store</span>
+                </label>
+            </div>
+            <div class="mt-4">
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" name="is_preorder" value="" class="sr-only peer">
+                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after: border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600"></div>
+                    <span class="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300">Is Pre-order</span>
+                </label>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Right Column: Organization -->
+    <div class="space-y-6">
+        
+        <!-- Status -->
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+            <h2 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Status</h2>
+            <select name="status" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
+                <option value="draft">Draft</option>
+                <option value="published" selected>Published</option>
+                <option value="archived">Archived</option>
+            </select>
+            <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">Products in draft status are hidden from customers.</p>
+        </div>
+        
+        <!-- Category Mapping -->
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+            <h2 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Organization</h2>
+            
+            <div class="space-y-4">
+                <div>
+                    <label for="category" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Category <span class="text-red-500">*</span></label>
+                    <select id="category" name="category" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" required>
+                        <option value="">Select Category</option>
+                        <!-- In Django: {% for cat in categories %}<option value="{{ cat.id }}">{{ cat.name }}</option>{% endfor %} -->
+                        <option value="1">Electronics</option>
+                        <option value="2">Clothing</option>
+                        <option value="3">Home & Garden</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label for="tags" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Tags</label>
+                    <input type="text" id="tags" name="tags" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" placeholder="e.g. summer, sale, new-arrival">
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Separate tags with commas</p>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+</form>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Drag and drop image upload preview logic
+        const dropzoneWrapper = document.querySelector('label[for="dropzone-file"]');
+        const fileInput = document.getElementById('dropzone-file');
+        const previewContainer = document.getElementById('image-preview');
+        const previewImage = document.getElementById('preview-img');
+        const removeButton = document.getElementById('remove-image');
+        
+        // Prevent default drag behaviors
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropzoneWrapper.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        // Highlight drop zone when item is dragged over it
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropzoneWrapper.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropzoneWrapper.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight(e) {
+            dropzoneWrapper.classList.add('border-primary-500', 'bg-primary-50');
+            dropzoneWrapper.classList.remove('border-gray-300', 'bg-gray-50');
+            if(document.documentElement.classList.contains('dark')) {
+                dropzoneWrapper.classList.add('dark:bg-gray-800');
+                dropzoneWrapper.classList.remove('dark:bg-gray-700');
+            }
+        }
+
+        function unhighlight(e) {
+            dropzoneWrapper.classList.remove('border-primary-500', 'bg-primary-50');
+            dropzoneWrapper.classList.add('border-gray-300', 'bg-gray-50');
+            if(document.documentElement.classList.contains('dark')) {
+                dropzoneWrapper.classList.remove('dark:bg-gray-800');
+                dropzoneWrapper.classList.add('dark:bg-gray-700');
+            }
+        }
+
+        // Handle dropped files
+        dropzoneWrapper.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            handleFiles(files);
+        }
+        
+        // Handle select files
+        fileInput.addEventListener('change', function() {
+            handleFiles(this.files);
+        });
+
+        function handleFiles(files) {
+            if (files && files.length > 0) {
+                const file = files[0];
+                
+                // Check if file is an image
+                if (!file.type.match('image.*')) {
+                    alert('Please select an image file');
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImage.src = e.target.result;
+                    previewContainer.classList.remove('hidden');
+                }
+                reader.readAsDataURL(file);
+                
+                // If this was from drag and drop, we need to assign it to the input manully
+                // (Note: This is secure because we're just copying File objects)
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                fileInput.files = dataTransfer.files;
+            }
+        }
+        
+        removeButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            fileInput.value = ''; // clear input
+            previewContainer.classList.add('hidden');
+            previewImage.src = '';
+        });
+    });
+</script>
+{% endblock %}
